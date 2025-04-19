@@ -3,13 +3,10 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
 
-// Incluir conexión PDO
 require 'conexion.php';
 
-// Leer datos JSON
 $datos = json_decode(file_get_contents("php://input"), true);
 
-// Validar campos requeridos
 if (
     !isset($datos["cod_socio"]) || !isset($datos["codigo"]) ||
     !isset($datos["descripcion"]) || !isset($datos["fecha_emision"]) ||
@@ -22,7 +19,6 @@ if (
 }
 
 try {
-    // 1. Buscar el id_Socio desde cod_socio
     $stmt = $conn->prepare("SELECT id_Socio FROM socio WHERE cod_socio = :cod_socio");
     $stmt->bindParam(":cod_socio", $datos["cod_socio"], PDO::PARAM_INT);
     $stmt->execute();
@@ -35,7 +31,6 @@ try {
 
     $idSocio = $stmt->fetchColumn();
 
-    // 2. Verificar si el código ya existe
     $stmtVerificar = $conn->prepare("SELECT id_cupon FROM cupones WHERE codigo = :codigo");
     $stmtVerificar->bindParam(":codigo", $datos["codigo"]);
     $stmtVerificar->execute();
@@ -46,7 +41,6 @@ try {
         exit;
     }
 
-    // 3. Insertar el nuevo cupón
     $stmtInsert = $conn->prepare("
         INSERT INTO cupones (id_Socio, codigo, descripcion, fecha_emision, fecha_vencimiento, estado, monto)
         VALUES (:id_Socio, :codigo, :descripcion, :fecha_emision, :fecha_vencimiento, :estado, :monto)
